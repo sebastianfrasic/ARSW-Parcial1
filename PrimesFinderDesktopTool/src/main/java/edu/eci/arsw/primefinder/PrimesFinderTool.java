@@ -1,30 +1,36 @@
 package edu.eci.arsw.primefinder;
 
-import edu.eci.arsw.mouseutils.MouseMovementMonitor;
-import java.io.IOException;
 import java.math.BigInteger;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.HttpClientBuilder;
 
 public class PrimesFinderTool {
 
-	public static void main(String[] args) {
-		            
-            int maxPrim=1000;
-            
-            PrimesResultSet prs=new PrimesResultSet("john");
-            
-            PrimeFinder.findPrimes(new BigInteger("1"), new BigInteger("10000"), prs);
-            
-            System.out.println("Prime numbers found:");
-            
-            System.out.println(prs.getPrimes());
+    public static void main(String[] args) {
+
+        int maxPrim = 100;
+        int numberOfThreads = 4;
+
+        PrimesResultSet prs = new PrimesResultSet("john");
+        PrimeFinderThread[] threads = new PrimeFinderThread[numberOfThreads];
+
+        int cantidad = maxPrim / numberOfThreads;
+        int inicio = 0;
+
+        for (int i = 0; i < numberOfThreads; i++) {
+            threads[i] = new PrimeFinderThread(new BigInteger(Integer.toString(inicio)), new BigInteger(Integer.toString(inicio + cantidad)), prs);
+            threads[i].start();
+            inicio += cantidad;
+        }
+
+        for (int i = 0; i < numberOfThreads; i++) {
+            try {
+                threads[i].join();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+
+        System.out.println("Prime numbers found:");
+        System.out.println(prs.getPrimes());
             
             
             /*while(task_not_finished){
@@ -42,13 +48,10 @@ public class PrimesFinderTool {
                     Logger.getLogger(PrimesFinderTool.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }*/
-                        
-            
-            
-            
-            
-	}
-	
+
+
+    }
+
 }
 
 
